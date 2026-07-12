@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Todo App</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; }
+        .todo-item { padding: 10px; margin: 5px 0; border: 1px solid #ddd; display: flex; align-items: center; }
+        .todo-title { flex: 1; }
+        .done { text-decoration: line-through; color: #888; }
+        button { margin-left: 10px; cursor: pointer; }
+        .add-form { display: flex; gap: 10px; margin-bottom: 20px; }
+        .add-form input { flex: 1; padding: 10px; }
+        .add-form button { padding: 10px 20px; }
+    </style>
+</head>
+<body>
+    <h1>📋 Todo List</h1>
+    
+    <form method="POST" action="/add" class="add-form">
+        <input type="text" name="title" placeholder="Введите задачу..." required>
+        <button type="submit">Добавить</button>
+    </form>
+    
+    <div id="todo-list">
+        {% for todo in todos %}
+        <div class="todo-item">
+            <span class="todo-title {% if todo.is_done %}done{% endif %}">
+                {{ todo.title }}
+            </span>
+            <form method="POST" action="/toggle/{{ todo.id }}" style="display: inline;">
+                <button type="submit">
+                    {% if todo.is_done %}✅{% else %}⬜{% endif %}
+                </button>
+            </form>
+            <form method="POST" action="/delete/{{ todo.id }}" style="display: inline;">
+                <button type="submit">🗑️</button>
+            </form>
+        </div>
+        {% else %}
+        <p style="color: #888;">Нет задач. Добавьте первую!</p>
+        {% endfor %}
+    </div>
+</body>
+</html>
