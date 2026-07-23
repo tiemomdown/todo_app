@@ -1,0 +1,43 @@
+name: Сборка и публикация Docker-образа
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  REGISTRY: ghcr.io  
+  IMAGE_NAME: ${{ github.repository }}  
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      packages: write  
+
+    steps:
+      # 1. Клонируем код
+      - name: Клонирование репозитория
+        uses: actions/checkout@v4
+
+      # 2. Логинимся в GitHub Container Registry
+      - name: Логин в GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # 3. Собираем Docker-образ с двумя тегами
+      - name: Сборка Docker-образа
+        run: |
+          docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest .
+          docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} .
+
+      # 4. Публикуем образы в реестр
+      - name: Публикация Docker-образов
+        run: |
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} --all-tags
